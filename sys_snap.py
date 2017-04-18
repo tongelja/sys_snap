@@ -131,6 +131,9 @@ class System_Snap:
             if j[0] == 'SESS':
                 if len(j) > 1:       self.print_sess_lines = int( j[1] )
                 else:                self.print_sess_lines = 5
+            if j[0] == 'SEGMENT_STAT':
+                if len(j) > 1:       self.print_stat_lines = int( j[1] )
+                else:                self.print_stat_lines = 5
             if j[0] == 'STAT':
                 if len(j) > 1:       self.print_stat_lines = int( j[1] )
                 else:                self.print_stat_lines = 5
@@ -155,6 +158,7 @@ class System_Snap:
     def create_snapshot(self):
 
         self.snapshot_switch = { 'STAT':   self.get_stats_snapshot,
+                                 'SEGMENT_STAT':  self.get_segment_stat_snapshot,
                                  'EVENT':  self.get_events_snapshot,
                                  'GSESS':  self.get_global_sess_snapshot,
                                  'SESS':   self.get_sess_snapshot,
@@ -168,6 +172,7 @@ class System_Snap:
                                }
 
         self.print_switch = {    'STAT':   self.print_stats,
+                                 'SEGMENT_STAT':  self.print_segment_stats,
                                  'EVENT':  self.print_events,
                                  'GSESS':  self.print_global_sessions,
                                  'SESS':   self.print_sessions,
@@ -304,6 +309,26 @@ class System_Snap:
     
             print '%-50s %15.1f %15.1f %-20s' % (s['stat']['delta'][i][0], s['stat']['delta'][i][1], s['stat']['delta'][i][1]/self.sleep_time, '/Sec' )
     
+
+    def print_segment_stats(self):
+
+        s           = self.sys
+        print_lines = self.print_stat_lines
+
+
+        if len( s['segment_stat']['delta']) < print_lines:
+            start = 0
+        else:
+            start = len( s['segment_stat']['delta']) - print_lines
+
+        for i in range(start, len( s['segment_stat']['delta']) ):
+            if i == start:
+                print '\n-- Segment Statistics ' + self.delimiter
+                print '%-80s %15s %20s' % ('Segment Statistic', 'Delta', 'Rate')
+
+            print '%-80s %15.1f %15.1f %-20s' % (s['segment_stat']['delta'][i][0], s['segment_stat']['delta'][i][1], s['segment_stat']['delta'][i][1]/self.sleep_time, '/Sec' )
+
+
 
 
     def print_sys_metrics(self):
@@ -880,7 +905,53 @@ class System_Snap:
             l = sorted(d.iteritems(), key=operator.itemgetter(1))
             self.sys['stat']['delta'] = l
     
-    
+   
+
+    def get_segment_stat_snapshot(self, run):
+        cursor     = self.db.cursor()
+        sql_stmt   = "select owner || '.' ||  object_name || ' -- ' || statistic_name , value, subobject_name, statistic_name, owner, object_name from v$segment_statistics where owner not in ('SYS')  "
+
+        if run == 1:
+            cursor.execute(sql_stmt)
+            rows = cursor.fetchall()
+
+            self.sys['segment_stat']               = {}
+            self.sys['segment_stat']['delta']      = []
+            self.sys['segment_stat']['run_data']   = {}
+
+            for i in range(0, len(rows)):
+                name = rows[i][0]
+                self.sys['segment_stat']['run_data'][name]           = {}
+                self.sys['segment_stat']['run_data'][name]['name']   = rows[i][0]
+                self.sys['segment_stat']['run_data'][name]['run_01'] = rows[i][1]
+
+        if run == 2:
+            d = {}
+            l = []
+
+            cursor.execute(sql_stmt)
+            rows = cursor.fetchall()
+            for i in range(0, len(rows)):
+                name = rows[i][0]
+                try:
+                    self.sys['segment_stat']['run_data'][name]['run_02'] = rows[i][1]
+                except KeyError:
+                    self.sys['segment_stat']['run_data'][name]           = {}
+                    self.sys['segment_stat']['run_data'][name]['name']   = rows[i][0]
+                    self.sys['segment_stat']['run_data'][name]['run_01'] = 0
+                    self.sys['segment_stat']['run_data'][name]['run_02'] = rows[i][1]
+
+                delta = self.sys['segment_stat']['run_data'][name]['run_02'] - self.sys['segment_stat']['run_data'][name]['run_01']
+                self.sys['segment_stat']['run_data'][name]['delta'] = delta
+
+                if delta > 0:
+                    d[name] = delta
+
+            l = sorted(d.iteritems(), key=operator.itemgetter(1))
+            self.sys['segment_stat']['delta'] = l
+
+
+ 
     
     def get_latch_snapshot(self, run):
         cursor = self.db.cursor()
