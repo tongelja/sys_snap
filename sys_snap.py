@@ -718,8 +718,8 @@ class System_Snap:
                         p.spid, nvl(to_char(px.qcsid), ' ')  \
                         from gv$session s, gv$sess_io io, gv$process p, gv$px_session px \
                         where s.inst_id = p.inst_id and s.inst_id = io.inst_id and s.inst_id = px.inst_id(+)  \
-                        and p.inst_id = io.inst_id and p.inst_id = px.inst_id  \
-                        and io.inst_id = px.inst_id  \
+                        and p.inst_id = io.inst_id and p.inst_id = px.inst_id(+)  \
+                        and io.inst_id = px.inst_id(+)  \
                         and s.sid = px.sid(+) and s.sid = io.sid and  s.paddr = p.addr and s.username is not null \
                         and s.event not like '%rdbms ipc message%' and s.event not like '%message from client%' \
                         and s.status = 'ACTIVE' \
