@@ -41,6 +41,19 @@ class color:
     UNDERLINE = '\033[4m'
     END = '\033[0m'
 
+
+def format_number(number_in):
+
+    if number_in >=1000000000:
+        number_out=str(round(number_in/1000/1000)) + 'M'
+    elif number_in >= 1000000:
+        number_out=str(round(number_in/1000)) + 'K'
+    else:
+        number_out = str(round(number_in))
+
+    return number_out
+
+
 ##
 ## usage
 ##
@@ -258,6 +271,7 @@ class System_Snap:
 
         print_lines = self.print_event_lines
         s           = self.sys
+        line_format = '{:<50s} {:>15s} {:>20s}'
 
         if len( s['event']['delta']) < print_lines:
             start = 0 
@@ -267,9 +281,11 @@ class System_Snap:
         for i in range(start, len( s['event']['delta']) ):
             if i == start:
                 print(color.BOLD + '\nEvents ' + self.delimiter + color.END )
-                print(color.BOLD + '{:<50} {:>15} {:>20s}'.format('Event', 'Delta', 'Rate') + color.END )
+                print(color.BOLD + line_format.format('Event', 'Delta', 'Rate') + color.END )
     
-            print('{:<50s} {:>15n} {:>20s}'.format(s['event']['delta'][i][0], round(s['event']['delta'][i][1]), str(round(s['event']['delta'][i][1]/self.sleep_time)) + '/Sec' ))
+            print(line_format.format(s['event']['delta'][i][0], 
+                                     format_number(s['event']['delta'][i][1]), 
+                                     format_number(s['event']['delta'][i][1]/self.sleep_time) + '/Sec' ))
     
 
     def print_file_io(self):
@@ -307,7 +323,7 @@ class System_Snap:
 
         s           = self.sys
         print_lines = self.print_stat_lines
-
+        line_format = '{:<50s} {:>15s} {:>20s}'
 
         if len( s['stat']['delta']) < print_lines:
             start = 0
@@ -317,9 +333,11 @@ class System_Snap:
         for i in range(start, len( s['stat']['delta']) ):
             if i == start:
                 print(color.BOLD + '\nStatistics ' + self.delimiter + color.END )
-                print(color.BOLD + '{:<50s} {:>15s} {:>20s}'.format('Statistic', 'Delta', 'Rate') + color.END )
+                print(color.BOLD + line_format.format('Statistic', 'Delta', 'Rate') + color.END )
     
-            print('{:<50s} {:>15n} {:>20s}'.format(s['stat']['delta'][i][0], s['stat']['delta'][i][1], str(round(s['stat']['delta'][i][1]/self.sleep_time)) + '/Sec' ))
+            print(line_format.format(s['stat']['delta'][i][0], 
+                                     format_number(s['stat']['delta'][i][1]), 
+                                     format_number(s['stat']['delta'][i][1]/self.sleep_time) + '/Sec' ))
     
 
     def print_segment_stats(self):
@@ -408,8 +426,7 @@ class System_Snap:
 
         print_lines    = self.print_sess_lines        
         s              = self.sys
-        head_format    = '{:<12s} {:<20s} {:<15s} {:<43s} {:>8s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>10s} {:>8s} {:>8s}'
-        line_format    = '{:<12s} {:<20s} {:<15s} {:<43s} {:>8n} {:>12n} {:>12n} {:>12n} {:>12n} {:>12n} {:>10s} {:>8n} {:>8s}'
+        line_format    = '{:<12s} {:<20s} {:<15s} {:<43s} {:>8s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>10s} {:>8s} {:>8s}'
         total_sessions = len(s['sess'])
 
 
@@ -422,7 +439,7 @@ class System_Snap:
     
             if i == start:
                 print(color.BOLD + '\nTop Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END )
-                line = color.BOLD + head_format.format('SID,Serial', 'Username', 'SQL ID', 'Event', 'ET', 
+                line = color.BOLD + line_format.format('SID,Serial', 'Username', 'SQL ID', 'Event', 'ET', 
                                       'Blk Gets', 'Cons Gets', 'Phy Rds', 'Blk Chgs', 
                                       'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' ) + color.END
                 print(line)
@@ -432,15 +449,15 @@ class System_Snap:
                                    s['sess'][i]['username'][:19],  
                                    s['sess'][i]['sql_id'], 
                                    s['sess'][i]['event'],  
-                                   round(s['sess'][i]['last_call_et']), 
-                                   round(s['sess'][i]['block_gets']), 
-                                   round(s['sess'][i]['cons_gets']), 
-                                   round(s['sess'][i]['phy_reads']), 
-                                   round(s['sess'][i]['blk_changes']), 
-                                   round(s['sess'][i]['cons_changes']), 
-                                   s['sess'][i]['os_pid'], 
-                                   round(s['sess'][i]['blocking_sid']),
-                                   s['sess'][i]['qc_sid'] )
+                                   format_number(s['sess'][i]['last_call_et']), 
+                                   format_number(s['sess'][i]['block_gets']), 
+                                   format_number(s['sess'][i]['cons_gets']), 
+                                   format_number(s['sess'][i]['phy_reads']), 
+                                   format_number(s['sess'][i]['blk_changes']), 
+                                   format_number(s['sess'][i]['cons_changes']), 
+                                   str(s['sess'][i]['os_pid']), 
+                                   str(s['sess'][i]['blocking_sid']),
+                                   str(s['sess'][i]['qc_sid']) )
             print(line)
     
     
