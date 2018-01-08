@@ -1,3 +1,4 @@
+#!/bin/python3
 
 #use this executable to run /tools/python/virtual/dba/bin/python
 
@@ -123,11 +124,8 @@ class System_Snap:
                  display_items):
     
     
-        self.delimiter                 = '-----------------------------'
-        self.column_format_01           = '%-40s %-2s'
-        self.column_format_02           = '%-40s %15s %20s'
-        self.column_format_03           = '%-40s %15.1f %15.1f %-4s'
-        self.column_format_04           = '%-80s'
+        self.delimiter                 = ' '
+        self.column_format_01           = '{:<40} {:<2}'
 
         self.sleep_time                = 5
         self.db                        = conn
@@ -222,7 +220,7 @@ class System_Snap:
 
         print_lines = self.print_latch_lines
         s           = self.sys
-        line_format = '%-30s %-10s %-10s %-10s'
+        line_format = '{:<30} {:<10s} {:<10} {:<10}'
 
         if len( s['latch']['sorted_delta']) < print_lines:
             start = 0
@@ -232,13 +230,13 @@ class System_Snap:
         for i in range(start, len( s['latch']['sorted_delta']) ):
             name = s['latch']['sorted_delta'][i][0]
             if i == start:
-                print(color.BOLD + '\n-- Latches ' + self.delimiter + color.END )
-                print(line_format % ('Latch', 'Gets', 'Misses', 'Sleeps'))
+                print(color.BOLD + '\nLatches ' + self.delimiter + color.END )
+                print(line_format.format('Latch', 'Gets', 'Misses', 'Sleeps'))
 
-            print(line_format % (name, s['latch']['run_data'][name]['delta']['get'] , s['latch']['run_data'][name]['delta']['miss'], s['latch']['run_data'][name]['delta']['sleep'] ))
+            print(line_format.format(name, s['latch']['run_data'][name]['delta']['get'] , s['latch']['run_data'][name]['delta']['miss'], s['latch']['run_data'][name]['delta']['sleep'] ))
 
 
-        line_format = '%-30s %-40s %-10s %-10s %-10s'
+        line_format = '{:<30} {:<40} {:<10} {:<10} {:<10}'
 
         if len( s['latch_miss']['sorted_delta']) < print_lines:
             start = 0
@@ -248,10 +246,10 @@ class System_Snap:
         for i in range(start, len( s['latch_miss']['sorted_delta']) ):
             name = s['latch_miss']['sorted_delta'][i][0]
             if i == start:
-                print('\n-- Latch Misses ' + self.delimiter)
-                print(line_format % ('Latch', 'Location', 'NW Fail', 'Sleeps', 'Wtr Sleeps'))
+                print('\nLatch Misses ' + self.delimiter)
+                print(line_format.format('Latch', 'Location', 'NW Fail', 'Sleeps', 'Wtr Sleeps'))
 
-            print(line_format % ( s['latch_miss']['run_data'][name]['run_02']['parent_name'], s['latch_miss']['run_data'][name]['run_02']['location'],   
+            print(line_format.format( s['latch_miss']['run_data'][name]['run_02']['parent_name'], s['latch_miss']['run_data'][name]['run_02']['location'],   
                                   s['latch_miss']['run_data'][name]['delta']['nwfail_count'] , s['latch_miss']['run_data'][name]['delta']['sleep_count'], 
                                   s['latch_miss']['run_data'][name]['delta']['wtr_slp_count'] ))
 
@@ -268,17 +266,18 @@ class System_Snap:
     
         for i in range(start, len( s['event']['delta']) ):
             if i == start:
-                print(color.BOLD + '\n-- Events ' + self.delimiter + color.END )
-                print('%-50s %15s %20s' % ('Event', 'Delta', 'Rate'))
+                print(color.BOLD + '\nEvents ' + self.delimiter + color.END )
+                print(color.BOLD + '{:<50} {:>15} {:>20s}'.format('Event', 'Delta', 'Rate') + color.END )
     
-            print('%-50s %15.1f %15.1f %-4s' % (s['event']['delta'][i][0], s['event']['delta'][i][1], s['event']['delta'][i][1]/self.sleep_time, '/Sec' ))
+            print('{:<50s} {:>15n} {:>20s}'.format(s['event']['delta'][i][0], round(s['event']['delta'][i][1]), str(round(s['event']['delta'][i][1]/self.sleep_time)) + '/Sec' ))
     
 
     def print_file_io(self):
 
         print_lines = self.print_file_io_lines
         s           = self.sys
-        line_format = '%-45s %15s %15s %15s %15s %15s %15s %15s %15s'
+        line_format = '{:<45s} {:>15n} {:>15n} {:>15n} {:>15n} {:>15n} {:>15n} {:>15n} {:>15n}'
+        head_format = '{:<45s} {:>15s} {:>15s} {:>15s} {:>15s} {:>15s} {:>15s} {:>15s} {:>15s}'
 
         if len( s['file_io']['sorted_delta']) < print_lines:
             start = 0
@@ -288,10 +287,10 @@ class System_Snap:
         for i in range(start, len( s['file_io']['sorted_delta']) ):
             name = s['file_io']['sorted_delta'][i][0]
             if i == start:
-                print(color.BOLD + '\n-- File I/O ' + self.delimiter + color.END )
-                print(line_format % ('File', 'Phy Rds', 'Phy Wrts', 'Phy Blk Rd', 'Phy Blk Wrt', 'Sgl Blk Rds', 'Rd Tm', 'Wrt Tm', 'Sgl Blk Rd Tim' ))
+                print( color.BOLD + '\nFile I/O ' + self.delimiter + color.END )
+                print( color.BOLD + head_format.format('File', 'Phy Rds', 'Phy Wrts', 'Phy Blk Rd', 'Phy Blk Wrt', 'Sgl Blk Rds', 'Rd Tm', 'Wrt Tm', 'Sgl Blk Rd Tim' ) + color.END )
 
-            print(line_format % (name, s['file_io']['run_data'][name]['delta']['phyrds'] , 
+            print(line_format.format(name, s['file_io']['run_data'][name]['delta']['phyrds'] , 
                                        s['file_io']['run_data'][name]['delta']['phywrts'], 
                                        s['file_io']['run_data'][name]['delta']['phyblkrd'] ,
                                        s['file_io']['run_data'][name]['delta']['phyblkwrt'] ,
@@ -317,10 +316,10 @@ class System_Snap:
     
         for i in range(start, len( s['stat']['delta']) ):
             if i == start:
-                print(color.BOLD + '\n-- Statistics ' + self.delimiter + color.END )
-                print('%-50s %15s %20s' % ('Statistic', 'Delta', 'Rate'))
+                print(color.BOLD + '\nStatistics ' + self.delimiter + color.END )
+                print(color.BOLD + '{:<50s} {:>15s} {:>20s}'.format('Statistic', 'Delta', 'Rate') + color.END )
     
-            print('%-50s %15.1f %15.1f %-20s' % (s['stat']['delta'][i][0], s['stat']['delta'][i][1], s['stat']['delta'][i][1]/self.sleep_time, '/Sec' ))
+            print('{:<50s} {:>15n} {:>20s}'.format(s['stat']['delta'][i][0], s['stat']['delta'][i][1], str(round(s['stat']['delta'][i][1]/self.sleep_time)) + '/Sec' ))
     
 
     def print_segment_stats(self):
@@ -336,10 +335,10 @@ class System_Snap:
 
         for i in range(start, len( s['segment_stat']['delta']) ):
             if i == start:
-                print('color.BOLD + \n-- Segment Statistics ' + self.delimiter + color.END )
-                print('%-80s %15s %20s' % ('Segment Statistic', 'Delta', 'Rate'))
+                print('color.BOLD + \nSegment Statistics ' + self.delimiter + color.END )
+                print('{:<80s} {:>15s} {:>20s}'.format('Segment Statistic', 'Delta', 'Rate'))
 
-            print('%-80s %15.1f %15.1f %-20s' % (s['segment_stat']['delta'][i][0], s['segment_stat']['delta'][i][1], s['segment_stat']['delta'][i][1]/self.sleep_time, '/Sec' ))
+            print('{:<80s} {:>15n} {:>20s}'.format(s['segment_stat']['delta'][i][0], round(s['segment_stat']['delta'][i][1]), str(round(s['segment_stat']['delta'][i][1]/self.sleep_time)) +  '/Sec' ))
 
 
 
@@ -351,9 +350,9 @@ class System_Snap:
         for i in range(0, len( s['metric'] ) ):
             s['metric'][i]['name'] = s['metric'][i]['name'].replace(' Per ', '/') 
             if i == 0:
-                print(color.BOLD + '\n-- Sys Metrics ' + self.delimiter + color.END )
+                print(color.BOLD + '\nSys Metrics ' + self.delimiter + color.END )
     
-            line = line + '%-35s %14.2f %15s' % ( s['metric'][i]['name'], s['metric'][i]['value'], ' ' )
+            line = line + '{:<35s} {:>15n} {:>15s}'.format( s['metric'][i]['name'], round(s['metric'][i]['value']), ' ' )
     
             if (i+1)% 3  == 0:
                 print(line)
@@ -361,7 +360,6 @@ class System_Snap:
     
             if i == len( s['metric'] ) -1 :
                 if (i+1)%3 > 0 :
-                    #line = '%-35s %14.2f' % ( s['metric'][i]['name'], s['metric'][i]['value'] )
                     print(line)
     
 
@@ -369,7 +367,8 @@ class System_Snap:
 
         print_lines    = self.print_global_sess_lines
         s              = self.sys
-        line_format    = '%-17s %-20s %-15s %-43s %8s %12s %12s %12s %12s %12s %10s %8s %8s'
+        line_format    = '{:<8} {:<17s} {:<20s} {:<15s} {:<43s} {:>8n} {:>12n} {:>12n} {:>12n} {:>12n} {:>12n} {:>10s} {:>8s} {:>8s}'
+        head_format    = '{:<8} {:<17s} {:<20s} {:<15s} {:<43s} {:>8s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>10s} {:>8s} {:>8s}'
         total_sessions = len(s['glob_sess'])
 
 
@@ -381,26 +380,27 @@ class System_Snap:
         for i in range(start, total_sessions ):
 
             if i == start:
-                print(color.BOLD + '\n-- Top Global Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END )
-                line = line_format % ( 'Inst: SID,Serial', 'Username', 'SQL ID', 'Event', 'ET',
+                print(color.BOLD + '\nTop Global Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END )
+                line = color.BOLD + head_format.format( 'Instance', ' SID,Serial', 'Username', 'SQL ID', 'Event', 'ET',
                                       'Blk Gets', 'Cons Gets', 'Phy Rds', 'Blk Chgs',
-                                      'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' )
+                                      'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' ) + color.END
                 print(line)
 
-            line = line_format % (
+            line = line_format.format(
+                                   s['glob_sess'][i]['inst_id'],
                                    s['glob_sess'][i]['sid'],
                                    s['glob_sess'][i]['username'][:19],
                                    s['glob_sess'][i]['sql_id'],
                                    s['glob_sess'][i]['event'],
-                                   s['glob_sess'][i]['last_call_et'],
-                                   s['glob_sess'][i]['block_gets'],
-                                   s['glob_sess'][i]['cons_gets'],
-                                   s['glob_sess'][i]['phy_reads'],
-                                   s['glob_sess'][i]['blk_changes'],
-                                   s['glob_sess'][i]['cons_changes'],
-                                   s['glob_sess'][i]['os_pid'],
-                                   s['glob_sess'][i]['blocking_sid'],
-                                   s['glob_sess'][i]['qc_sid'] )
+                                   round(s['glob_sess'][i]['last_call_et']),
+                                   round(s['glob_sess'][i]['block_gets']),
+                                   round(s['glob_sess'][i]['cons_gets']),
+                                   round(s['glob_sess'][i]['phy_reads']),
+                                   round(s['glob_sess'][i]['blk_changes']),
+                                   round(s['glob_sess'][i]['cons_changes']),
+                                   str(s['glob_sess'][i]['os_pid']),
+                                   str(s['glob_sess'][i]['blocking_sid']),
+                                   str(s['glob_sess'][i]['qc_sid']) )
             print(line)
 
 
@@ -408,7 +408,8 @@ class System_Snap:
 
         print_lines    = self.print_sess_lines        
         s              = self.sys
-        line_format    = '%-12s %-20s %-15s %-43s %8s %12s %12s %12s %12s %12s %10s %8s %8s'
+        head_format    = '{:<12s} {:<20s} {:<15s} {:<43s} {:>8s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>10s} {:>8s} {:>8s}'
+        line_format    = '{:<12s} {:<20s} {:<15s} {:<43s} {:>8n} {:>12n} {:>12n} {:>12n} {:>12n} {:>12n} {:>10s} {:>8n} {:>8s}'
         total_sessions = len(s['sess'])
 
 
@@ -420,26 +421,25 @@ class System_Snap:
         for i in range(start, total_sessions ):
     
             if i == start:
-                print(color.BOLD + '\n-- Top Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END )
-                line = line_format % ('SID,Serial', 'Username', 'SQL ID', 'Event', 'ET', 
+                print(color.BOLD + '\nTop Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END )
+                line = color.BOLD + head_format.format('SID,Serial', 'Username', 'SQL ID', 'Event', 'ET', 
                                       'Blk Gets', 'Cons Gets', 'Phy Rds', 'Blk Chgs', 
-                                      'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' )
+                                      'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' ) + color.END
                 print(line)
     
-            line = line_format % ( 
+            line = line_format.format( 
                                    s['sess'][i]['sid'],  
                                    s['sess'][i]['username'][:19],  
                                    s['sess'][i]['sql_id'], 
                                    s['sess'][i]['event'],  
-                                   #s['sess'][i]['sql_text'],  
-                                   s['sess'][i]['last_call_et'], 
-                                   s['sess'][i]['block_gets'], 
-                                   s['sess'][i]['cons_gets'], 
-                                   s['sess'][i]['phy_reads'], 
-                                   s['sess'][i]['blk_changes'], 
-                                   s['sess'][i]['cons_changes'], 
+                                   round(s['sess'][i]['last_call_et']), 
+                                   round(s['sess'][i]['block_gets']), 
+                                   round(s['sess'][i]['cons_gets']), 
+                                   round(s['sess'][i]['phy_reads']), 
+                                   round(s['sess'][i]['blk_changes']), 
+                                   round(s['sess'][i]['cons_changes']), 
                                    s['sess'][i]['os_pid'], 
-                                   s['sess'][i]['blocking_sid'],
+                                   round(s['sess'][i]['blocking_sid']),
                                    s['sess'][i]['qc_sid'] )
             print(line)
     
@@ -473,21 +473,21 @@ class System_Snap:
 
         i            = 0
         line         = ''
-        stat_format  = '%-' + str( len( reduce(max_length, list(field_names.values())) )+2) + 's %-10s'
+        stat_format  = '{:<' + str( len( reduce(max_length, list(field_names.values())) )+2) + 's} {:<10s}'
         print_fields = ['name', 'instance_name', 'host_name', 'version',
                         'sysdate', 'startup_time', 'status', 'database_status',
                         'current_scn', 'controlfile_sequence#', 'checkpoint_change#', 'archive_change#']
 
         for j in print_fields:
             if i == 0:
-                print(color.BOLD + '\n-- DB, Instance ' + self.delimiter + color.END )
+                print(color.BOLD + '\nDB, Instance ' + self.delimiter + color.END )
 
             if j is not None:
-                stat = stat_format % ( field_names[j] + ': ' , str(s['db_inst'][j]) )
+                stat = stat_format.format( field_names[j] + ': ' , str(s['db_inst'][j]) )
             else:
                 stat = ' '
 
-            line = line + line_format % ( stat, ' ' )
+            line = line + line_format.format( stat, ' ' )
 
 
             if (i+1)% columns  == 0:
@@ -506,7 +506,8 @@ class System_Snap:
 
         print_lines    = self.print_temp_usage_lines
         s              = self.sys
-        line_format    = '%-15s %-20s %-15s %-15s %-15s %-15s %-20s'
+        head_format    = '{:<15s} {:<20s} {:<15s} {:<15s} {:<15s} {:<10s} {:>10s}'
+        line_format    = '{:<15s} {:<20s} {:<15s} {:<15s} {:<15s} {:<10s} {:>10n}'
         total_records = len(s['temp_usage'])
 
 
@@ -518,19 +519,19 @@ class System_Snap:
         for i in range(start, total_records ):
 
             if i == start:
-                print(color.BOLD + '\n-- Temp Usage' + self.delimiter + color.END )
-                line = line_format % ('SID,Serial', 'Username', 'MB Used', 'SQL ID', 'Contents', \
-                                      'Status', 'Tablespace' )
+                print(color.BOLD + '\nTemp Usage' + self.delimiter + color.END )
+                line = color.BOLD + head_format.format('SID,Serial', 'Username', 'SQL ID', 'Contents', \
+                                      'Status', 'Tablespace', 'MB Used' ) + color.END
                 print(line)
 
-            line = line_format % ( 
+            line = line_format.format( 
                                    s['temp_usage'][i]['sid_serial'],  
                                    s['temp_usage'][i]['username'],  
-                                   s['temp_usage'][i]['mb_used'],  
                                    s['temp_usage'][i]['sql_id'],  
                                    s['temp_usage'][i]['contents'],  
                                    s['temp_usage'][i]['status'],  
                                    s['temp_usage'][i]['tbsp'],  
+                                   round(s['temp_usage'][i]['mb_used']),  
                                  )
             print(line)
 
@@ -539,7 +540,7 @@ class System_Snap:
 
         print_lines    = self.print_undo_usage_lines
         s              = self.sys
-        line_format    = '%-15s %-20s %-15s %-15s %-15s'
+        line_format    = '{:<15s} {:<20s} {:<15s} {:>15s} {:>15s}'
         total_records = len(s['undo_usage'])
 
 
@@ -551,16 +552,16 @@ class System_Snap:
         for i in range(start, total_records ):
 
             if i == start:
-                print(color.BOLD + '\n-- Undo Usage' + self.delimiter + color.END )
-                line = line_format % ('SID,Serial', 'Username', 'KB Used', 'Blks Used', 'SQL ID' )
+                print(color.BOLD + '\nUndo Usage' + self.delimiter + color.END )
+                line = color.BOLD + line_format.format('SID,Serial', 'Username', 'SQL ID', 'KB Used', 'Blks Used' ) + color.END
                 print(line)
 
-            line = line_format % (
-                                   s['undo_usage'][i]['sid_serial'],
+            line = line_format.format(
+                                   str(s['undo_usage'][i]['sid_serial']),
                                    s['undo_usage'][i]['username'],
-                                   s['undo_usage'][i]['kb_used'],
-                                   s['undo_usage'][i]['blk_used'],
-                                   s['undo_usage'][i]['sql_id'],
+                                   str(s['undo_usage'][i]['sql_id']),
+                                   str(s['undo_usage'][i]['kb_used']),
+                                   str(s['undo_usage'][i]['blk_used']),
                                  )
             print(line)
 
@@ -569,9 +570,7 @@ class System_Snap:
     def print_sgainfo(self):
 
         s             = self.sys
-        head_format   = '%-30s %-20s %-20s %-20s %-20s %-10s %-15s %-10s %-25s %-20s'
-        line_format   = '%-30s %-20s %-20s %-20s %-20s %-10s %-15s %-10s %-25s %-20s'
-        #line_format   = '%-20s %-20d %-20d %-20d %-20d %-10d %-15s %-10s %-25s %-20d'
+        line_format   = '{:<30s} {:>20s} {:>20} {:>20s} {:>20s} {:>10s} {:>15s} {:>10s} {:>25s} {:>20s}'
         start         = 0   
         total_records = len(s['sgainfo'])
 
@@ -579,10 +578,10 @@ class System_Snap:
 
         for i in range(start, total_records):
             if i == start:
-                print(color.BOLD + '\n-- SGA ' + self.delimiter + color.END )
-                line = head_format % ( 'Component', 'Cur Size', 'Min Size', 'Max Size', 'Spec Size', 'Op Cnt', 'Lst Op Typ', 'Lst Op Md', 'Lst Op Tm', 'Gran Sz' )
+                print(color.BOLD + '\nSGA ' + self.delimiter + color.END )
+                line = line_format.format( 'Component', 'Cur Size', 'Min Size', 'Max Size', 'Spec Size', 'Op Cnt', 'Lst Op Typ', 'Lst Op Md', 'Lst Op Tm', 'Gran Sz' )
                 print(line)
-            line = line_format % (  str(s['sgainfo'][i][0]), str(s['sgainfo'][i][1]), str(s['sgainfo'][i][2]), str(s['sgainfo'][i][3]), str(s['sgainfo'][i][4]), str(s['sgainfo'][i][5]), 
+            line = line_format.format(  str(s['sgainfo'][i][0]), str(s['sgainfo'][i][1]), str(s['sgainfo'][i][2]), str(s['sgainfo'][i][3]), str(s['sgainfo'][i][4]), str(s['sgainfo'][i][5]), 
                                     str(s['sgainfo'][i][6]), str(s['sgainfo'][i][7]), str(s['sgainfo'][i][8]), str(s['sgainfo'][i][9]) )
             print(line)
 
@@ -590,13 +589,13 @@ class System_Snap:
     def print_pgastat(self):
 
         s             = self.sys
-        line_format   = '%-40s %-30s'
+        line_format   = '{:<40s} {:>30s}'
         start         = 0
         total_records = len(s['pgastat'])
 
         for i in range(start, total_records):
             if i == start:
-                print(color.BOLD + '\n-- PGA ' + self.delimiter + color.END )
+                print(color.BOLD + '\nPGA ' + self.delimiter + color.END )
 
             if s['pgastat'][i][2] is None: 
                 unit =  str( s['pgastat'][i][1] )
@@ -606,7 +605,7 @@ class System_Snap:
                 else:
                     unit =  str( s['pgastat'][i][1] ) + ' ' + s['pgastat'][i][2]
                 
-            line = line_format % ( s['pgastat'][i][0], unit )
+            line = line_format.format( s['pgastat'][i][0], unit )
             print(line)
 
 
@@ -739,7 +738,7 @@ class System_Snap:
             self.sys['glob_sess']     = []
 
             sql_stmt = "select  s.state, \
-                        '(' || s.inst_id || ': ' || s.sid || ',' || s.serial# || ')' sid , \
+                        s.sid || ',' || s.serial# sid , \
                         s.username  username, \
                         case when s.state != 'WAITING' \
                              then 'On CPU (Prev: ' || case when length(s.event) > 25 \
@@ -754,17 +753,17 @@ class System_Snap:
                         s.seconds_in_wait seconds, nvl(s.sql_id, '--') sql_id, \
                         s.last_call_et, \
                         io.block_gets, io.consistent_gets, io.physical_reads, io.block_changes, io.consistent_gets, \
-                        p.spid, nvl(to_char(px.qcsid), ' ')  \
-                        from gv$session s, gv$sess_io io, gv$process p, gv$px_session px \
-                        where s.inst_id = p.inst_id and s.inst_id = io.inst_id and s.inst_id = px.inst_id(+)  \
-                        and p.inst_id = io.inst_id and p.inst_id = px.inst_id(+)  \
-                        and io.inst_id = px.inst_id(+)  \
-                        and s.sid = px.sid(+) and s.sid = io.sid and  s.paddr = p.addr and s.username is not null \
+                        p.spid, \
+                        (select distinct nvl(to_char(px.qcsid), '--' ) from gv$px_session px where px.inst_id = s.inst_id and px.sid = s.sid),  \
+                        s.inst_id  \
+                        from gv$session s, gv$sess_io io, gv$process p \
+                        where s.inst_id = p.inst_id and s.inst_id = io.inst_id   \
+                        and p.inst_id = io.inst_id \
+                        and s.sid = io.sid and  s.paddr = p.addr and s.username is not null \
                         and s.event not like '%rdbms ipc message%' and s.event not like '%message from client%' \
                         and s.status = 'ACTIVE' \
                         order by s.last_call_et, s.sid "
 
-            #print sql_stmt
             cursor.execute(sql_stmt)
             rows = cursor.fetchall()
 
@@ -790,6 +789,7 @@ class System_Snap:
                 r[i]['cons_changes']    = rows[i][15]
                 r[i]['os_pid']          = rows[i][16]
                 r[i]['qc_sid']          = rows[i][17]
+                r[i]['inst_id']         = rows[i][18]
 
             self.sys['glob_sess'] = r
 
@@ -827,7 +827,6 @@ class System_Snap:
                         order by s.last_call_et, s.sid " 
 
         
-            #print sql_stmt
             cursor.execute(sql_stmt)
             rows = cursor.fetchall()
          
@@ -867,7 +866,6 @@ class System_Snap:
             sql_stmt = "select to_char(end_time, 'mm/dd/yyyy hh24:mi:ss') end_time, metric_id, metric_name, value, metric_unit  \
                         from v$sysmetric where begin_time in (select max(begin_time) from v$sysmetric) "  
         
-            #print sql_stmt
             cursor.execute(sql_stmt)
             rows = cursor.fetchall()
         
